@@ -52,7 +52,7 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_NAME || 'student_manager',
   entities: [Student, Subject, Mark],
-  // migrations: ['src/migrations/*.ts'],
+  migrations: ['src/migrations/*.ts'],
   synchronize: false, // Disable synchronize in favor of migrations
   logging: process.env.NODE_ENV === 'development',
   ssl: process.env.DB_SSL === 'true' ? {
@@ -71,8 +71,8 @@ export const initializeDatabase = async () => {
     logger.info('Database connection established');
 
     // Run migrations
-    // await AppDataSource.runMigrations();
-    // logger.info('Database migrations completed');
+    await AppDataSource.runMigrations();
+    logger.info('Database migrations completed');
 
     // Verify tables exist
     const tables = await AppDataSource.query(`

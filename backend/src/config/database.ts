@@ -29,6 +29,10 @@ const createDatabase = async () => {
     );
 
     if (result.length === 0) {
+      // Run migrations
+      await AppDataSource.runMigrations();
+      logger.info('Database migrations completed');
+
       // Create the database if it doesn't exist
       await tempDataSource.query(`CREATE DATABASE ${process.env.DB_NAME || 'student_manager'}`);
       logger.info(`Database ${process.env.DB_NAME || 'student_manager'} created successfully`);
@@ -70,9 +74,7 @@ export const initializeDatabase = async () => {
     await AppDataSource.initialize();
     logger.info('Database connection established');
 
-    // Run migrations
-    await AppDataSource.runMigrations();
-    logger.info('Database migrations completed');
+    
 
     // Verify tables exist
     const tables = await AppDataSource.query(`

@@ -85,10 +85,3 @@ src/
 
 The frontend integrates with the Student Manager Backend API. Make sure the backend server is running on `http://localhost:3000` before starting the frontend application.
 
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a new Pull Request

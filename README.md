@@ -144,10 +144,6 @@ student-manager/
      DB_PASSWORD=postgres
      DB_NAME=student_manager
      ```
-   - Run database migrations:
-     ```bash
-     npm run typeorm migration:run
-     ```
 
 4. Set up the frontend:
    ```bash

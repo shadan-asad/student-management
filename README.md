@@ -2,6 +2,8 @@
 
 A full-stack web application for managing students, subjects, and their academic marks. Built with Node.js, Express, TypeScript, React, and PostgreSQL.
 
+Deployed URL: https://student-management-puce.vercel.app/
+
 ## Features
 
 ### Student Management

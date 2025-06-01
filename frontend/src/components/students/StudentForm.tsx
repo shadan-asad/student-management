@@ -10,11 +10,40 @@ import type { Student } from '../../types';
 import Swal from 'sweetalert2';
 
 const validationSchema = Yup.object().shape({
-  firstName: Yup.string().required('First name is required'),
-  lastName: Yup.string().required('Last name is required'),
-  email: Yup.string().email('Invalid email').required('Email is required'),
-  dateOfBirth: Yup.date().required('Date of birth is required'),
-  gender: Yup.string().oneOf(['MALE', 'FEMALE', 'OTHER']).required('Gender is required'),
+  firstName: Yup.string()
+    .required('First name is required')
+    .min(3, 'First name must be at least 3 characters')
+    .max(40, 'First name cannot exceed 40 characters')
+    .matches(/^[a-zA-Z\s-']+$/, 'First name can only contain letters, spaces, hyphens, and apostrophes'),
+  lastName: Yup.string()
+    .required('Last name is required')
+    .min(3, 'Last name must be at least 3 characters')
+    .max(40, 'Last name cannot exceed 40 characters')
+    .matches(/^[a-zA-Z\s-']+$/, 'Last name can only contain letters, spaces, hyphens, and apostrophes'),
+  email: Yup.string()
+    .required('Email is required')
+    .email('Please enter a valid email address')
+    .matches(
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      'Please enter a valid email address'
+    ),
+  dateOfBirth: Yup.date()
+    .required('Date of birth is required')
+    .max(new Date(), 'Date of birth cannot be in the future')
+    .test('age', 'Date of birth cannot be more than 120 years ago', (value) => {
+      if (!value) return false;
+      const today = new Date();
+      const birthDate = new Date(value);
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        return age - 1 <= 120;
+      }
+      return age <= 120;
+    }),
+  gender: Yup.string()
+    .oneOf(['MALE', 'FEMALE', 'OTHER'], 'Please select a valid gender')
+    .required('Gender is required'),
 });
 
 export const StudentForm = () => {
@@ -81,7 +110,7 @@ export const StudentForm = () => {
           onSubmit={handleSubmit}
           enableReinitialize
         >
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting, isValid, dirty }) => (
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3">
                 <Form.Label>First Name</Form.Label>
@@ -92,6 +121,7 @@ export const StudentForm = () => {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   isInvalid={touched.firstName && !!errors.firstName}
+                  placeholder="Enter first name"
                 />
                 <Form.Control.Feedback type="invalid">
                   {errors.firstName}
@@ -107,6 +137,7 @@ export const StudentForm = () => {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   isInvalid={touched.lastName && !!errors.lastName}
+                  placeholder="Enter last name"
                 />
                 <Form.Control.Feedback type="invalid">
                   {errors.lastName}
@@ -122,6 +153,7 @@ export const StudentForm = () => {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   isInvalid={touched.email && !!errors.email}
+                  placeholder="Enter email address"
                 />
                 <Form.Control.Feedback type="invalid">
                   {errors.email}
@@ -137,6 +169,7 @@ export const StudentForm = () => {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   isInvalid={touched.dateOfBirth && !!errors.dateOfBirth}
+                  max={new Date().toISOString().split('T')[0]}
                 />
                 <Form.Control.Feedback type="invalid">
                   {errors.dateOfBirth}
@@ -162,7 +195,11 @@ export const StudentForm = () => {
               </Form.Group>
 
               <div className="d-flex gap-2">
-                <Button variant="primary" type="submit" disabled={isSubmitting}>
+                <Button 
+                  variant="primary" 
+                  type="submit" 
+                  disabled={isSubmitting || !isValid || !dirty}
+                >
                   {isSubmitting ? 'Saving...' : 'Save'}
                 </Button>
                 <Button variant="secondary" onClick={() => navigate('/')}>

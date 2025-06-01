@@ -10,8 +10,17 @@ import type { Subject } from '../../types';
 import Swal from 'sweetalert2';
 
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required('Name is required'),
-  code: Yup.string().required('Code is required'),
+  name: Yup.string()
+    .required('Subject name is required')
+    .min(3, 'Subject name must be at least 3 characters')
+    .max(60, 'Subject name cannot exceed 60 characters')
+    .matches(/^[a-zA-Z0-9\s-]+$/, 'Subject name can only contain letters, numbers, spaces, and hyphens'),
+  code: Yup.string()
+    .required('Subject code is required')
+    .min(3, 'Subject code must be at least 3 characters')
+    .max(15, 'Subject code cannot exceed 15 characters')
+    .matches(/^[A-Z0-9-]+$/, 'Subject code can only contain uppercase letters, numbers, and hyphens')
+    .uppercase(),
 });
 
 export const SubjectForm = () => {
@@ -74,11 +83,13 @@ export const SubjectForm = () => {
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
           enableReinitialize
+          validateOnChange={true}
+          validateOnBlur={true}
         >
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting, isValid, dirty, setFieldValue }) => (
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3">
-                <Form.Label>Name</Form.Label>
+                <Form.Label>Subject Name</Form.Label>
                 <Form.Control
                   type="text"
                   name="name"
@@ -86,6 +97,7 @@ export const SubjectForm = () => {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   isInvalid={touched.name && !!errors.name}
+                  placeholder="Enter subject name"
                 />
                 <Form.Control.Feedback type="invalid">
                   {errors.name}
@@ -93,14 +105,19 @@ export const SubjectForm = () => {
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Code</Form.Label>
+                <Form.Label>Subject Code</Form.Label>
                 <Form.Control
                   type="text"
                   name="code"
                   value={values.code}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    const value = e.target.value.toUpperCase();
+                    setFieldValue('code', value, true);
+                  }}
                   onBlur={handleBlur}
-                  isInvalid={touched.code && !!errors.code}
+                  isInvalid={!!errors.code}
+                  placeholder="Enter subject code"
+                  style={{ textTransform: 'uppercase' }}
                 />
                 <Form.Control.Feedback type="invalid">
                   {errors.code}
@@ -108,7 +125,11 @@ export const SubjectForm = () => {
               </Form.Group>
 
               <div className="d-flex gap-2">
-                <Button variant="primary" type="submit" disabled={isSubmitting}>
+                <Button 
+                  variant="primary" 
+                  type="submit" 
+                  disabled={isSubmitting || !isValid || !dirty}
+                >
                   {isSubmitting ? 'Saving...' : 'Save'}
                 </Button>
                 <Button variant="secondary" onClick={() => navigate('/subjects')}>
